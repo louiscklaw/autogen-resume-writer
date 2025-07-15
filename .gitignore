@@ -3,3 +3,4 @@
 **/_del
 **/_archive
 **/test_browser_data_dir
+.env
