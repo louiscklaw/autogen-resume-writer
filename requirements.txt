@@ -1,0 +1,13 @@
+markitdown[all]
+#
+autogen-core
+autogen-agentchat
+#
+autogen-ext[openai]
+autogen-ext[azure]
+autogen-ext[web-surfer]
+#
+aiohttp
+chromadb
+sentence_transformers
+autogen-ext[chromadb]
