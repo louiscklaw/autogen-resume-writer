@@ -1,5 +1,7 @@
 # Autogen Resume Writer
 
+## Description/Purpose
+
 This project leverages Autogen to help users create, analyze, and refine resumes, incorporating AI agents for automated feedback and content generation.
 
 ## Features
@@ -21,20 +23,27 @@ This section includes multiple diagrams to illustrate the project architecture a
 ```mermaid
 mindmap
   root((Resume Writer))
-    (Discover<br/>Job<br/>Post)
+    (Discover<br/>Job<br/>Post<br/>scraper)
       (Jobsdb<br/>Search<br/>List)
       (classification)
         (job<br/>type)
         (job<br/>requirement)
         (candiates<br/>portfolio)
     (Write<br/>Application<br/>Letter)
+      (write)
+        (websurfer)
+          (google search)
+          (wiki search)
         (writing<br/>agents)
-        (review<br/>agents)
+      (review)
+        (content<br/>check<br/>agents)
+        (company<br/>perspective<br/>agents)
     (Tools)
       (playwright)
-      (autogen)
-        (openrouter)
-            (deepseek)
+      (agentic)
+        (autogen)
+      (openrouter)
+        (deepseek)
       (markdown)
         (docx)
         (draft)
@@ -44,13 +53,37 @@ mindmap
 
 ```mermaid
 graph TD;
-    A[User provides resume or job details] --> B{Autogen agents};
-    B --> C[Resume analysis];
-    B --> D[Cover letter generation];
-    C --> E[Provide feedback];
-    D --> F[Generate personalized content];
-    E & F --> G[Output refined resume and cover letter];
+  L1End((end))
+  A[periodic scraper found a link in job search]
+  B[user manually insert a link in job search]
+  C1[Yes: mark todo item]
+  C2[No: Remark it]
+  D[Classify if it is related to I.T.]
+  A --> D --> C1;
+  B --> D --> C2;
+  C1 --> L1End;
+  C2 --> L1End;
 ```
+
+scrape job from job list flow
+
+
+```mermaid
+graph TD;
+  E[fetch job detail]
+  F1[fetch company<br/>background]
+  F2[google company<br/>news]
+  G[fetch candiate<br/> background]
+  H[combine ideas,<br/>draft initial<br/> application letter]
+  L2Start --> E --> F1 --> H --> L2End;
+  E --> F2;
+  E --> G;
+  F2 --> H;
+  G --> H;
+```
+
+draft application letter flow
+
 
 ## Installation
 
@@ -87,25 +120,23 @@ conda deactivate
 
 ## Usage
 
-1. Run the main script:
+### 1. Run the main script
 
 ```bash
 python main.py
 ```
 
-2. Follow the prompts to input your resume details or job target.
+### 2. Follow the prompts to input your resume details or job target
 
 ## Dependencies
 
 - Python 3.11 or later
+- conda
 - Autogen
 - OpenRouter API key (for AI services)
 - Required libraries listed in `requirements.txt`
 
-## License
+## Credits:
+- [kasm project](https://github.com/kasmtech)
 
-MIT
-
-## Contributing
-
-Pull requests are welcome. Ensure all changes adhere to the development standards and include tests where necessary.
+updated at: 2025-Jul-18
