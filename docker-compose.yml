@@ -1,0 +1,94 @@
+name: autogen-resume-writer
+
+volumes:
+  config:
+
+
+services:
+  chromium:
+    # container_name: chromium
+    # image: lscr.io/linuxserver/chromium:latest
+    image: 192.168.10.61:5000/kasm_baseline-conda
+    build: ./docker/docker-chromium
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - TITLE=autogen-resume-writer
+      - FM_HOME=/app
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Hong_Kong
+      - CHROME_CLI=https://www.gmail.com/ #optional
+      - CUSTOM_PORT=23000 # Internal port the container listens on for http if it needs to be swapped from the default 3000.
+      - CUSTOM_HTTPS_PORT=23001 # Internal port the container listens on for https if it needs to be swapped from the default 3001.
+      - NO_FULL=1 # Do not autmatically fullscreen applications when using openbox.
+      - LC_ALL=en_US.UTF-8 # Set the locale.
+      - INSTALL_PACKAGES=fonts-noto-cjk
+      #
+      - USER_DATA_DIR=/browser_data_dir
+      - RESULTS_DIR=/results
+      - POCKETBASE_ENDPOINT=http://pocketbase:8090
+
+    volumes:
+      # NOTE:
+      # do not map /config away as pyenv installed during docker build
+      # - ./volumes/chromium/config:/config
+      #
+      - config:/config
+      - ./src:/app
+      - ./volumes/chromium/share:/share
+      - ./volumes/chromium/browser_data_dir:/browser_data_dir
+      - ./volumes/chromium/results:/results
+
+    ports:
+      - 6110:23000 # vnc (http)
+      - 6111:23001 # vnc (https)
+
+    shm_size: '1gb'
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:23000']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.01'
+          memory: 16M
+
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    # container_name: pocketbase
+    # hostname: pocketbase
+    # restart: unless-stopped
+    # environment:
+    #   ENCRYPTION: example #optional
+    ports:
+      - 6112:8090 # dashboard http://192.168.10.21:6111/_
+
+    volumes:
+      - ./volumes/pocketbase/pb_data:/pb_data
+      - ./volumes/pocketbase/pb_migrations:/pb_migrations
+      - ./volumes/pocketbase/pb_hooks:/pb_hooks
+
+    healthcheck:
+      #optional (recommended) since v0.10.0
+      test: wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.01'
+          memory: 8M
